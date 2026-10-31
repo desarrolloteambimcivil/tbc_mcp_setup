@@ -2,3 +2,7 @@ downloads/
 installer/payload/
 installer/output/
 artifacts/
+
+# Internal notes and local Claude Code context, never published.
+.private/
+CLAUDE.local.md
