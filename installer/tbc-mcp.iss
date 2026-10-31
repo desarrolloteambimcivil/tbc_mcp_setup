@@ -276,6 +276,34 @@ begin
   if Result = '' then Result := 'none' else Delete(Result, 1, 1);
 end;
 
+{ Claude Desktop rewrites its config file when it quits, which can drop the entries just added.
+  Claude Code's CLI is also claude.exe, so the desktop app is told apart by its folder. }
+function ClaudeDesktopRunning(): Boolean;
+var
+  Locator, Service, Items, Item: Variant;
+  I: Integer;
+  Path: String;
+begin
+  Result := False;
+  try
+    Locator := CreateOleObject('WbemScripting.SWbemLocator');
+    Service := Locator.ConnectServer('.', 'root\CIMV2');
+    Items := Service.ExecQuery('SELECT ExecutablePath FROM Win32_Process WHERE Name = ''claude.exe''');
+    for I := 0 to Items.Count - 1 do
+    begin
+      Item := Items.ItemIndex(I);
+      { Another user's process has no readable path. }
+      if VarIsNull(Item.ExecutablePath) then Continue;
+      Path := Item.ExecutablePath;
+      Path := Lowercase(Path);
+      if (Pos('\windowsapps\claude_', Path) > 0) or (Pos('\anthropicclaude\', Path) > 0) then
+        Result := True;
+    end;
+  except
+    Result := False;
+  end;
+end;
+
 function ProgramsToClose(): String;
 begin
   Result := '';
@@ -283,6 +311,8 @@ begin
     Result := Result + RunningProcesses(['Revit.exe', 'tbc-revit-mcp.exe', 'RvtMcp.Server.exe', 'rvt-mcp.exe']);
   if WizardIsComponentSelected('acad') then
     Result := Result + RunningProcesses(['acad.exe', 'tbc-acad-mcp.exe']);
+  if ClientsPage.Values[1] and ClaudeDesktopRunning() then
+    Result := Result + '  • Claude Desktop' + #13#10;
 end;
 
 { The standalone tbc-revit-mcp installer and this suite would install the same add-ins and
