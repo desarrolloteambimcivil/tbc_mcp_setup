@@ -1,0 +1,47 @@
+name: build
+
+# Manual only: the suite is rebuilt when one of the products publishes a release.
+on:
+  workflow_dispatch:
+    inputs:
+      revit_tag:
+        description: tbc-revit-mcp release tag (empty = latest)
+        required: false
+      acad_tag:
+        description: tbc-acad-mcp release tag (empty = latest)
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  installer:
+    name: installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test skills install and uninstall
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests/skills.Tests.ps1
+
+      - name: Download product releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/fetch-releases.ps1 -RevitTag "${{ inputs.revit_tag }}" -AcadTag "${{ inputs.acad_tag }}"
+
+      # Public build: no company skills.
+      - name: Build TBC-MCP installer (Inno Setup)
+        run: |
+          choco install innosetup --no-progress -y
+          powershell -NoProfile -ExecutionPolicy Bypass -File installer/build.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: tbc-mcp-installer
+          path: |
+            installer/output/TbcMcp_Setup_*.exe
+            installer/output/TbcMcp_Setup_*.exe.sha256
+            installer/payload/suite.json
+          retention-days: 14

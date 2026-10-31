@@ -1,0 +1,14 @@
+TBC-MCP Setup
+Copyright 2026 Nour Rouas (https://github.com/desarrolloteambimcivil/tbc_mcp_setup)
+
+This installer packages two products, each with its own NOTICE inside its folder:
+
+- tbc-revit-mcp (https://github.com/desarrolloteambimcivil/tbc_mcp_revit), a modified
+  version of rvt-mcp (https://github.com/bimwright/rvt-mcp), copyright 2026 Khoa Le
+  (Bimwright) and contributors, licensed under the Apache License, Version 2.0.
+- tbc-acad-mcp (https://github.com/desarrolloteambimcivil/tbc_mcp_autocad), a modified
+  version of dwg-mcp (https://github.com/bimwright/dwg-mcp), copyright 2026 Khoa Le (Bimwright) and
+  contributors, licensed under the Apache License, Version 2.0.
+
+"Bimwright" and its logos are not used to brand this product. The TeamBIMCivil logo is a
+trademark of TeamBIMCivil and is used here by its owner.
